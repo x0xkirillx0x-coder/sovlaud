@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SOVLAUD</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0a;--surf:#121212;--line:rgba(255,255,255,.1);--ink:#ecebe7;--mute:#8d8b86;--ash:#bdbab3}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{background:radial-gradient(120% 55% at 50% 0%,#1d1d1d 0%,var(--bg) 62%);color:var(--ink);font:400 15px/1.4 Onest,system-ui,sans-serif;min-height:100vh;padding:0 16px calc(120px + env(safe-area-inset-bottom))}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.09;z-index:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+header,main,footer{position:relative;z-index:1}
+header{text-align:center;padding-top:calc(var(--tg-safe-area-inset-top,0px) + var(--tg-content-safe-area-inset-top,0px) + 14px)}
+.logo{height:86px;max-width:80%;object-fit:contain}
+.wm{font:700 30px Unbounded,sans-serif;letter-spacing:.16em;padding:22px 0}
+.bar{display:flex;justify-content:space-between;align-items:center;margin:16px 0 18px}
+.tag{font-size:10px;letter-spacing:.24em;color:var(--mute);text-align:left;line-height:1.7;text-transform:uppercase}
+#cartBtn{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);border-radius:999px;padding:10px 16px;font:500 13px Onest;letter-spacing:.04em}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:16px;scrollbar-width:none}
+.tabs button{flex:none;border:1px solid var(--line);background:none;color:var(--mute);border-radius:999px;padding:9px 18px;font:500 13px Onest;letter-spacing:.04em;transition:.2s}
+.tabs button.on{background:var(--ink);color:#0a0a0a;border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card{border:1px solid var(--line);background:var(--surf);border-radius:4px;overflow:hidden}
+.pic{position:relative;aspect-ratio:3/4;background:linear-gradient(160deg,#1d1d1d,#0e0e0e);display:grid;place-items:center;font:700 34px Unbounded;color:rgba(255,255,255,.07)}
+.pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.meta{display:flex;justify-content:space-between;align-items:center;padding:12px 12px 14px}
+.meta b{display:block;font-weight:500;font-size:13px;letter-spacing:.02em}
+.meta span{color:var(--mute);font-size:13px;font-variant-numeric:tabular-nums}
+.plus{width:34px;height:34px;flex:none;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;color:var(--ash);font-size:19px;line-height:1}
+footer{display:flex;justify-content:space-between;align-items:center;margin-top:36px;color:var(--mute);font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+.sheet{position:fixed;inset:0;z-index:10;background:rgba(0,0,0,.62);backdrop-filter:blur(4px);display:none;align-items:flex-end}
+.sheet.open{display:flex}
+.panel{width:100%;max-height:92vh;overflow:auto;background:#101010;border-top:1px solid var(--line);border-radius:18px 18px 0 0;padding:10px 18px calc(24px + env(safe-area-inset-bottom));animation:up .28s cubic-bezier(.2,.8,.2,1)}
+@keyframes up{from{transform:translateY(30px);opacity:0}}
+.grab{width:38px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 14px}
+.gal{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:8px;margin-bottom:14px;scrollbar-width:none}
+.gal .pic{flex:0 0 84%;scroll-snap-align:center;border-radius:4px}
+h2{font:700 17px Unbounded,sans-serif;letter-spacing:.05em;margin-bottom:6px}
+.pr{color:var(--ash);font-variant-numeric:tabular-nums}
+.sizes{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 14px}
+.sizes button{min-width:50px;height:44px;border:1px solid var(--line);background:none;color:var(--ink);border-radius:4px;font:500 14px Onest}
+.sizes button.on{background:var(--ink);color:#0a0a0a;border-color:var(--ink)}
+.btn{width:100%;border:0;background:var(--ink);color:#0a0a0a;border-radius:4px;padding:16px;font:600 13px Onest;letter-spacing:.14em;text-transform:uppercase}
+.msg{color:#e0806a;font-size:13px;min-height:20px;margin:8px 0}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid var(--line);font-size:14px}
+.qty{display:flex;align-items:center;gap:12px;margin-top:6px;color:var(--mute)}
+.qty button{width:28px;height:28px;border:1px solid var(--line);background:none;color:var(--ink);border-radius:50%;font-size:16px;line-height:1}
+.tot{display:flex;justify-content:space-between;padding:16px 0 12px;font:600 15px Onest}
+label{display:block;color:var(--mute);font-size:11px;letter-spacing:.2em;text-transform:uppercase;margin:6px 0 8px}
+input{width:100%;background:#181818;border:1px solid var(--line);color:var(--ink);border-radius:4px;padding:15px;font:500 16px Onest;outline:none}
+input:focus{border-color:var(--ash)}
+.note{color:var(--mute);font-size:12px;margin:10px 0 14px}
+</style>
+</head>
+<body>
+<header><img class="logo" src="img/logo.png" alt="SOVLAUD" onerror="this.outerHTML='<div class=wm>SOVLAUD</div>'"></header>
+<main>
+  <div class="bar"><div class="tag">Streetwear<br>Community<br>Worldwide</div><button id="cartBtn">Корзина · 0</button></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="grid" id="grid"></div>
+</main>
+<footer><span>Create your<br>own reality</span><span style="text-align:right">SOVLAUD®<br>Est. 2024</span></footer>
+<div class="sheet" id="sheet"><div class="panel" id="panel"></div></div>
+
+<script>
+window.onerror = (m,s,l) => { const d=document.createElement('pre'); d.style.cssText='white-space:pre-wrap;color:#e0806a;font-size:12px;padding:8px;position:relative;z-index:99'; d.textContent=m+' (строка '+l+')'; document.body.prepend(d); };
+const noop = () => {};
+const stub = {ready:noop, expand:noop, sendData:noop, MainButton:{setParams:noop, show:noop, hide:noop, onClick:noop}};
+const tg = (window.Telegram && window.Telegram.WebApp) || stub;
+const inTG = !!(tg.platform && tg.platform !== 'unknown');
+try { tg.ready(); tg.expand(); tg.setHeaderColor('#0a0a0a'); tg.setBackgroundColor('#0a0a0a'); tg.setBottomBarColor && tg.setBottomBarColor('#0a0a0a'); } catch(e) {}
+
+// ====== ТОВАРЫ: фото кладите в папку img рядом с index.html ======
+const PRODUCTS = [
+  {id:1, name:'Худи Oversize', cat:'Худи',       price:5900, sizes:['S','M','L','XL'], imgs:['img/hoodie-oversize.jpg']},
+  {id:2, name:'Худи Zip',      cat:'Худи',       price:6400, sizes:['M','L','XL'],     imgs:['img/hoodie-zip.jpg']},
+  {id:3, name:'Футболка Box',  cat:'Футболки',   price:2900, sizes:['S','M','L','XL'], imgs:['img/tee-box.jpg']},
+  {id:4, name:'Футболка Logo', cat:'Футболки',   price:2600, sizes:['S','M','L'],      imgs:['img/tee-logo.jpg']},
+  {id:5, name:'Карго штаны',   cat:'Штаны',      price:5200, sizes:['S','M','L','XL'], imgs:[]},
+  {id:6, name:'Кепка',         cat:'Аксессуары', price:1800, sizes:['ONE'],            imgs:[]},
+];
+const fmt = n => n.toLocaleString('ru-RU') + ' ₽';
+const $ = id => document.getElementById(id);
+const prod = id => PRODUCTS.find(p => p.id === id);
+let cart = [], filter = 'Все', chosen = null, phone = '';
+
+const pic = (p, i=0) => `<div class="pic">SL${p.imgs[i] ? `<img src="${p.imgs[i]}" loading="lazy" onerror="this.remove()">` : ''}</div>`;
+
+function renderTabs(){
+  const cats = ['Все', ...new Set(PRODUCTS.map(p => p.cat))];
+  $('tabs').innerHTML = cats.map(c => `<button class="${c===filter?'on':''}" onclick="filter='${c}';renderTabs();renderGrid()">${c}</button>`).join('');
+}
+function renderGrid(){
+  $('grid').innerHTML = PRODUCTS.filter(p => filter==='Все' || p.cat===filter).map(p =>
+    `<div class="card" onclick="openProduct(${p.id})">${pic(p)}<div class="meta"><div><b>${p.name}</b><span>${fmt(p.price)}</span></div><div class="plus">+</div></div></div>`).join('');
+}
+function openSheet(html){ $('panel').innerHTML = '<div class="grab"></div>' + html; $('sheet').classList.add('open'); }
+function closeSheet(){ $('sheet').classList.remove('open'); }
+$('sheet').addEventListener('click', e => { if(e.target.id==='sheet') closeSheet(); });
+
+function openProduct(id){
+  const p = prod(id); chosen = null;
+  const gal = (p.imgs.length ? p.imgs : [null]).map((_,i) => pic(p,i)).join('');
+  openSheet(`<div class="gal">${gal}</div><h2>${p.name}</h2><div class="pr">${fmt(p.price)} · предзаказ</div>
+    <div class="sizes">${p.sizes.map(s => `<button onclick="pickSize(this,'${s}')">${s}</button>`).join('')}</div>
+    <div class="msg" id="msg"></div>
+    <button class="btn" onclick="addToCart(${p.id})">В корзину</button>`);
+  if(p.sizes.length === 1) pickSize(document.querySelector('.sizes button'), p.sizes[0]);
+}
+function pickSize(el, s){
+  chosen = s;
+  document.querySelectorAll('.sizes button').forEach(b => b.classList.remove('on'));
+  el.classList.add('on'); $('msg').textContent = '';
+}
+function addToCart(id){
+  if(!chosen){ $('msg').textContent = 'Сначала выберите размер'; return; }
+  const f = cart.find(i => i.id===id && i.size===chosen);
+  f ? f.qty++ : cart.push({id, size:chosen, qty:1});
+  closeSheet(); update();
+  try { tg.HapticFeedback && tg.HapticFeedback.notificationOccurred('success'); } catch(e) {}
+}
+const total = () => cart.reduce((s,i) => s + prod(i.id).price*i.qty, 0);
+const count = () => cart.reduce((s,i) => s + i.qty, 0);
+
+function openCart(){
+  if(!cart.length){ openSheet('<h2>Корзина</h2><p class="note">Пока пусто. Выберите вещь и размер.</p>'); return; }
+  openSheet(`<h2>Предзаказ</h2>` + cart.map((i,k) => { const p = prod(i.id); return `
+    <div class="row"><div><b style="font-weight:500">${p.name}</b> <span class="pr">· ${i.size}</span>
+      <div class="qty"><button onclick="chg(${k},-1)">−</button>${i.qty}<button onclick="chg(${k},1)">+</button></div></div>
+      <span class="pr">${fmt(p.price*i.qty)}</span></div>`; }).join('') +
+    `<div class="tot"><span>Итого</span><span>${fmt(total())}</span></div>
+    <label for="phone">Номер телефона</label>
+    <input id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 900 000 00 00" value="${phone}" oninput="phone=this.value">
+    <p class="note">Мы свяжемся с вами по этому номеру для подтверждения предзаказа.</p>
+    <div class="msg" id="msg"></div>
+    <button class="btn" onclick="submit()">Оформить предзаказ</button>`);
+}
+function chg(k, d){ cart[k].qty += d; if(cart[k].qty < 1) cart.splice(k,1); update(); cart.length ? openCart() : closeSheet(); }
+function submit(){
+  const digits = phone.replace(/\D/g,'');
+  const say = t => $('msg').textContent = t;
+  if(digits.length < 10 || digits.length > 15) return say('Введите номер телефона с кодом, например +7 900 000 00 00');
+  if(!inTG) return say('Откройте магазин из Telegram: в браузере предзаказ отправить нельзя.');
+  if(tg.initDataUnsafe && tg.initDataUnsafe.query_id) return say('Откройте магазин кнопкой «Открыть магазин» внизу чата с ботом, только так предзаказ дойдёт.');
+  const items = cart.map(i => { const p = prod(i.id); return {name:p.name, size:i.size, qty:i.qty, price:p.price}; });
+  tg.sendData(JSON.stringify({phone, items, total:total()}));
+}
+$('cartBtn').onclick = openCart;
+
+function update(){
+  $('cartBtn').textContent = `Корзина · ${count()}`;
+  try {
+    if(count()){ tg.MainButton.setParams({text:`Оформить предзаказ · ${fmt(total())}`, color:'#ecebe7', text_color:'#0a0a0a'}); tg.MainButton.show(); }
+    else tg.MainButton.hide();
+  } catch(e) {}
+}
+tg.MainButton.onClick(openCart);
+renderTabs(); renderGrid();
+</script>
+</body>
+</html>
